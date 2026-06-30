@@ -1,99 +1,218 @@
+// =============================================================
+//  JSON editor field — eKor "Himalayan Warm" theme
+//  Re-themes the bundled jsoneditor (code mode) so the widget
+//  reads as part of eKor rather than a raw developer tool.
+// =============================================================
+$ekor-pine: #234438;
+$ekor-pine-deep: #1b352b;
+$ekor-terracotta: #c2542f;
+$ekor-gold: #c8a96e;
+$ekor-navy: #1a2535;
+$ekor-paper: #faf8f3;
+$ekor-paper-deep: #f2ece0;
+$ekor-ink: #33302b;
+$ekor-muted: #9a9183;
+$ekor-line: #e7dfd1;
+$ekor-radius: 10px;
+
 .o_field_json_editor {
+  // ----- Editable: framed code surface -----
   .json-editor-container {
-    min-height: 300px;
-    border: 1px solid $border-color;
-    border-radius: $border-radius;
-    overflow: visible;
+    position: relative;
+    min-height: 200px;
+    background: $ekor-paper;
+    border: 1px solid $ekor-line;
+    border-radius: $ekor-radius;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba($ekor-navy, 0.05);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    // Clear, on-brand focus state
+    &:focus-within {
+      border-color: $ekor-pine;
+      box-shadow: 0 0 0 3px rgba($ekor-gold, 0.35);
+    }
 
     .jsoneditor {
       border: none;
       height: 100%;
-      min-height: 300px;
+      min-height: 200px;
+      background: transparent;
 
+      // ---------- Toolbar ----------
       .jsoneditor-menu {
-        background-color: $gray-200;
-        border-bottom: 1px solid $border-color;
+        position: relative;
+        box-sizing: border-box;
+        height: 42px;
+        padding: 4px 8px;
+        background: $ekor-pine;
+        border-bottom: none;
+        // thin gold hairline that ties the bar to the brand
+        box-shadow: inset 0 -2px 0 0 rgba($ekor-gold, 0.6);
 
-        // Style for the mode dropdown container
-        ul.jsoneditor-menu {
-          background-color: $white;
-          border: 1px solid $border-color;
-          border-radius: $border-radius;
-          box-shadow: 0 2px 4px rgba($black, 0.1);
-        }
-
-        // Style for all menu buttons
+        // All toolbar buttons -> quiet ghost buttons (icons are light)
         button {
-          background-color: $o-brand-primary;
+          width: 28px;
+          height: 28px;
+          margin: 4px 1px;
+          padding: 0;
+          background-color: transparent;
           border: none;
-          opacity: 1;
+          border-radius: 6px;
+          opacity: 0.92;
+          transition: background-color 0.12s ease, opacity 0.12s ease;
 
+          &:hover {
+            opacity: 1;
+            background-color: rgba(#ffffff, 0.14);
+          }
+          &:active {
+            background-color: rgba(#ffffff, 0.22);
+          }
           &.jsoneditor-separator {
             margin-right: 0.5rem;
           }
+        }
 
-          // Mode selection buttons
-          &.jsoneditor-type-modes {
-            background-color: transparent;
-            color: $gray-700;
+        // Mode switcher ("Code v") -> a clean pill
+        button.jsoneditor-modes {
+          width: auto;
+          min-width: auto;
+          padding: 0 10px;
+          color: #ffffff;
+          font-weight: 500;
+          background-color: rgba(#ffffff, 0.1);
+          &:hover {
+            background-color: rgba(#ffffff, 0.18);
+          }
+        }
 
-            .jsoneditor-icon {
-              filter: brightness(0.5);
+        // Search box (code mode)
+        .jsoneditor-search {
+          .jsoneditor-frame {
+            background: rgba(#ffffff, 0.94);
+            border-radius: 6px;
+            padding: 1px 6px;
+            margin-top: 4px;
+
+            input {
+              font-family: $font-family-monospace;
+              color: $ekor-ink;
             }
+          }
+          .jsoneditor-results {
+            color: rgba(#ffffff, 0.85);
+          }
+        }
 
-            .jsoneditor-text {
-              color: $gray-700;
+        // Mode dropdown popup -> warm paper card
+        ul.jsoneditor-menu {
+          background: $ekor-paper;
+          border: 1px solid $ekor-line;
+          border-radius: 8px;
+          box-shadow: 0 6px 18px rgba($ekor-navy, 0.18);
+          overflow: hidden;
+
+          li button {
+            width: 100%;
+            color: $ekor-ink;
+            background: transparent;
+            border-radius: 0;
+            opacity: 1;
+
+            &:hover {
+              background: rgba($ekor-pine, 0.1);
             }
-
-            // Selected mode
-            &.jsoneditor-selected {
-              background-color: $o-brand-primary;
-
-              .jsoneditor-icon {
-                filter: brightness(1);
-              }
-
-              .jsoneditor-text {
-                color: $white;
-              }
-            }
-
-            &:hover:not(.jsoneditor-selected) {
-              background-color: $gray-300;
+            &.jsoneditor-selected,
+            &.jsoneditor-selected:hover {
+              background: $ekor-pine;
+              color: #ffffff;
             }
           }
         }
       }
 
-      .ace-jsoneditor {
-        min-height: 250px;
-      }
-
+      // ---------- Code (ACE) area ----------
       .jsoneditor-outer {
         margin: 0;
         padding: 0;
       }
-
+      .ace-jsoneditor {
+        min-height: 160px;
+        background: $ekor-paper;
+      }
       .ace_editor {
         font-family: $font-family-monospace;
         font-size: $font-size-sm;
+        line-height: 1.6;
+        background: $ekor-paper;
+        color: $ekor-ink;
+      }
+      // Muted, warm gutter instead of stark grey
+      .ace-jsoneditor .ace_gutter {
+        background: $ekor-paper-deep;
+        color: $ekor-muted;
+        border-right: 1px solid $ekor-line;
+      }
+      // Soften the harsh default active-line / selection
+      .ace-jsoneditor .ace_gutter-active-line {
+        background: rgba($ekor-gold, 0.2);
+      }
+      .ace-jsoneditor .ace_marker-layer .ace_active-line {
+        background: rgba($ekor-gold, 0.1);
+      }
+      .ace-jsoneditor .ace_marker-layer .ace_selection {
+        background: rgba($ekor-pine, 0.16);
+      }
+      .ace-jsoneditor .ace_cursor {
+        color: $ekor-terracotta;
+      }
+      // Warm, legible JSON syntax tints
+      .ace-jsoneditor .ace_variable {
+        color: $ekor-navy;
+      }
+      .ace-jsoneditor .ace_string {
+        color: $ekor-pine;
+      }
+      .ace-jsoneditor .ace_constant.ace_numeric,
+      .ace-jsoneditor .ace_constant.ace_language {
+        color: $ekor-terracotta;
       }
 
-      /* No tree mode styling needed as we removed tree mode */
+      // ---------- Status bar (Ln / Col) ----------
+      .jsoneditor-statusbar {
+        height: 26px;
+        line-height: 26px;
+        background: $ekor-paper-deep;
+        border-top: 1px solid $ekor-line;
+        color: $ekor-muted;
+        font-size: 11px;
+      }
     }
   }
 
+  // ----- Readonly: warm code card -----
   .json-view {
-    background-color: $gray-100;
-    border: 1px solid $border-color;
-    border-radius: $border-radius;
-    padding: 0.5rem;
+    background: $ekor-paper;
+    border: 1px solid $ekor-line;
+    border-left: 3px solid $ekor-gold;
+    border-radius: $ekor-radius;
+    padding: 0.75rem 1rem;
     margin: 0;
-    max-height: 300px;
+    max-height: 320px;
     overflow: auto;
     font-family: $font-family-monospace;
     font-size: $font-size-sm;
+    line-height: 1.6;
+    color: $ekor-ink;
     white-space: pre-wrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .json-editor-container,
+    .json-editor-container * {
+      transition: none !important;
+    }
   }
 }
 
