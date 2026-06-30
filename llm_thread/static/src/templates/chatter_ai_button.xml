@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <templates>
+    <!--
+    Extend Chatter to add an AI Chat button and an inline AI chat mode.
+
+    Odoo 17 note: we do NOT reproduce the native chatter content (the Odoo 18
+    version replaced o-mail-Chatter-content and re-rendered 18-only internals
+    such as mail.ScheduledMessagesList / props.has_activities, which do not
+    exist in 17). Instead we inject the LLM container as a sibling shown only
+    while chatting, and hide the native content meanwhile - so Odoo 17 renders
+    its own chatter content untouched in normal mode.
+    -->
     <t
         t-name="llm_thread.ChatterAIExtension"
         t-inherit="mail.Chatter"
@@ -30,7 +40,7 @@
             </div>
         </xpath>
 
-        <!-- Hide native content while chatting -->
+        <!-- Hide native content while chatting (native 17 content renders normally otherwise) -->
         <xpath expr="//div[hasclass('o-mail-Chatter-content')]" position="attributes">
             <attribute name="t-att-class">{ 'd-none': state.isChattingWithLLM }</attribute>
         </xpath>

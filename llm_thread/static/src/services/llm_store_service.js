@@ -490,7 +490,9 @@ export const llmStoreService = {
       },
     });
 
-    // Initialize LLM data after mailStore is ready (which calls init_messaging)
+    // Initialize LLM data after mailStore is ready (which calls init_messaging).
+    // Odoo 17's mail store may not expose `isReady`; Promise.resolve handles
+    // a Promise, a Deferred, or undefined uniformly.
     Promise.resolve(mailStore.isReady).then(() => {
       llmStore.initialize();
     });

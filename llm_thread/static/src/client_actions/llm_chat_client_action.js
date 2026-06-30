@@ -17,6 +17,8 @@ export class LLMChatClientAction extends Component {
 
   setup() {
     this.llmStore = useState(useService("llm.store"));
+    // Odoo 17: mail.store is already a reactive Store; useState() cannot
+    // re-proxy the class instance ("Cannot make the given value reactive").
     this.mailStore = useService("mail.store");
     this.orm = useService("orm");
     this.notification = useService("notification");

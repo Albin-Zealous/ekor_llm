@@ -17,7 +17,7 @@ export class LLMThreadHeader extends Component {
 
   setup() {
     this.llmStore = useState(useService("llm.store"));
-    this.mailStore = useService("mail.store");
+    this.mailStore = useService("mail.store"); // Odoo 17: already reactive; do not re-wrap in useState
     this.orm = useService("orm");
     this.notification = useService("notification");
 

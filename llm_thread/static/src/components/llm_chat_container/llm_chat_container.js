@@ -21,7 +21,7 @@ export class LLMChatContainer extends Component {
 
   setup() {
     this.llmStore = useState(useService("llm.store"));
-    this.mailStore = useService("mail.store");
+    this.mailStore = useService("mail.store"); // Odoo 17: already reactive; do not re-wrap in useState
     this.action = useService("action");
     this.ui = useState(useService("ui")); // Wrap with useState to make it reactive
 
