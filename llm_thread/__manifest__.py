@@ -1,16 +1,16 @@
 {
     "name": "Easy AI Chat",
-    "summary": "Simple AI Chat for Odoo",
+    "summary": "Simple AI Chat for eKor",
     "description": """
-Easy AI Chat for Odoo
+Easy AI Chat for eKor
 =====================
-A user-friendly module that brings AI-powered chat to your Odoo environment. Integrate with multiple AI providers, manage real-time conversations, and enhance workflows with multimodal support.
+A user-friendly module that brings AI-powered chat to your eKor environment. Integrate with multiple AI providers, manage real-time conversations, and enhance workflows with multimodal support.
 
 Key Features:
 - Multiple AI Providers: OpenAI, Anthropic, Grok, Ollama, DeepSeek, and more
-- Real-Time Chat: Instant AI conversations integrated with Odoo's mail system
+- Real-Time Chat: Instant AI conversations integrated with eKor's mail system
 - Multimodal Support: Go beyond text with advanced AI models
-- Full Odoo Integration: Link chats to any Odoo record for context
+- Full eKor Integration: Link chats to any eKor record for context
 - Tool Integration: Enable AI to execute custom tools and functions
 - Function Calling: Select specific tools for each thread to enhance AI capabilities
 - Optimized Performance: Efficient role-based message handling for better performance
@@ -25,7 +25,7 @@ Getting Started:
 1. Install this module and the "LLM Integration Base" dependency
 2. Configure your AI provider API keys
 3. Fetch available models with one click
-4. Start chatting from anywhere in Odoo
+4. Start chatting from anywhere in eKor
 
 Use cases include customer support automation, data analysis, training assistance, custom AI workflows, and automated tool execution for your business.
 
@@ -55,7 +55,7 @@ Contact: support@apexive.com
             "llm_thread/static/src/components/llm_thread_header/llm_thread_header.js",
             "llm_thread/static/src/components/llm_thread_header/llm_thread_header.xml",
             "llm_thread/static/src/components/llm_thread_header/llm_thread_header.scss",
-            # Related Record component for linking threads to Odoo records
+            # Related Record component for linking threads to eKor records
             "llm_thread/static/src/components/llm_related_record/llm_related_record.js",
             "llm_thread/static/src/components/llm_related_record/llm_related_record.xml",
             "llm_thread/static/src/components/llm_related_record/llm_related_record.scss",

@@ -1,8 +1,8 @@
 ======================================
-LLM Thread - Easy AI Chat for Odoo
+LLM Thread - Easy AI Chat for eKor
 ======================================
 
-Real-time AI chat interface for Odoo with streaming responses, tool execution, and seamless integration with Odoo's mail system.
+Real-time AI chat interface for eKor with streaming responses, tool execution, and seamless integration with eKor's mail system.
 
 **Module Type:** 📦 Infrastructure
 
@@ -31,7 +31,7 @@ These are pulled in automatically:
 
 - ``llm`` (core infrastructure)
 - ``llm_tool`` (function calling)
-- ``mail``, ``web`` (Odoo base)
+- ``mail``, ``web`` (eKor base)
 
 Common Setups
 -------------
@@ -39,7 +39,7 @@ Common Setups
 +---------------------------+------------------------------------------------------+
 | I want to...              | Install                                              |
 +===========================+======================================================+
-| Chat with AI in Odoo      | ``llm_assistant`` + ``llm_openai``                   |
+| Chat with AI in eKor      | ``llm_assistant`` + ``llm_openai``                   |
 +---------------------------+------------------------------------------------------+
 | Chat with local AI        | ``llm_assistant`` + ``llm_ollama``                   |
 +---------------------------+------------------------------------------------------+
@@ -51,7 +51,7 @@ Common Setups
 What is LLM Thread?
 ===================
 
-LLM Thread brings conversational AI directly into Odoo. It provides the chat UI and message management layer, bridging the frontend interface with the generation engine (``llm_generate``), provider APIs, and tool execution framework. Chat with AI models from OpenAI, Anthropic, Ollama, and dozens of other providers through a familiar messaging interface. Link conversations to any Odoo record, enable tool execution, and get streaming responses in real-time.
+LLM Thread brings conversational AI directly into eKor. It provides the chat UI and message management layer, bridging the frontend interface with the generation engine (``llm_generate``), provider APIs, and tool execution framework. Chat with AI models from OpenAI, Anthropic, Ollama, and dozens of other providers through a familiar messaging interface. Link conversations to any eKor record, enable tool execution, and get streaming responses in real-time.
 
 **Note**: This module provides the chat interface and orchestration. Actual LLM generation is handled by ``llm_generate`` module, while ``llm_assistant`` provides assistant configurations and prompt templates.
 
@@ -101,7 +101,7 @@ Navigate to **LLM → Configuration → Providers**:
 4. Enable Tools (Optional)
 --------------------------
 
-To let AI execute actions in Odoo:
+To let AI execute actions in eKor:
 
 - Install ``llm_assistant`` module for full functionality
 - In your thread, select available tools
@@ -166,7 +166,7 @@ Real-time token-by-token streaming for immediate feedback:
 Related Records
 ---------------
 
-Link any conversation to an Odoo record for context:
+Link any conversation to an eKor record for context:
 
 .. code-block:: python
 
@@ -322,7 +322,7 @@ Frontend Components
 LLM Chat Container
 ------------------
 
-Main chat interface component using Odoo's mail components:
+Main chat interface component using eKor's mail components:
 
 .. code-block:: javascript
 
@@ -349,7 +349,7 @@ Provider/model selection and thread configuration:
 Related Record Picker
 ---------------------
 
-Link threads to any Odoo record:
+Link threads to any eKor record:
 
 .. code-block:: javascript
 
@@ -423,7 +423,7 @@ Troubleshooting
 
 - Check provider API key is valid
 - Verify model is active and supports chat
-- Check Odoo logs for API errors
+- Check eKor logs for API errors
 
 **Streaming not working?**
 
@@ -453,7 +453,7 @@ Security
 ========
 
 - **User-scoped**: Each thread belongs to a user
-- **ACL enforced**: Standard Odoo access control rules apply
+- **ACL enforced**: Standard eKor access control rules apply
 - **Tool permissions**: Tools execute with user's permissions
 - **No shared locks**: Advisory locks are per-thread, per-session
 

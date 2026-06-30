@@ -1,10 +1,10 @@
 {
     "name": "LLM Assistant",
     "summary": """
-        LLM/AI Assistant module with prompt templates for Odoo
+        LLM/AI Assistant module with prompt templates for eKor
     """,
     "description": """
-LLM Assistant with Prompt Templates for Odoo
+LLM Assistant with Prompt Templates for eKor
 ==================
 Configure AI assistants with specific roles, goals, and tools to enhance your AI interactions.
 Includes comprehensive prompt template management for reusable LLM interactions.

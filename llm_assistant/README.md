@@ -1,6 +1,6 @@
-# LLM Assistant for Odoo
+# LLM Assistant for eKor
 
-Advanced AI assistant management with integrated prompt templates, testing capabilities, and intelligent configuration orchestration. This module serves as the intelligence layer that defines how Odoo data connects to AI models.
+Advanced AI assistant management with integrated prompt templates, testing capabilities, and intelligent configuration orchestration. This module serves as the intelligence layer that defines how eKor data connects to AI models.
 
 **Module Type:** 🚀 Entry Point
 
@@ -10,7 +10,7 @@ Advanced AI assistant management with integrated prompt templates, testing capab
 
 ### What to Install
 
-This is the **main entry point** for AI chat features in Odoo.
+This is the **main entry point** for AI chat features in eKor.
 
 **Basic AI Chat Setup:**
 
@@ -25,7 +25,7 @@ These are pulled in automatically:
 - `llm` (core infrastructure)
 - `llm_tool` (function calling)
 - `llm_thread` (chat interface)
-- `mail` (Odoo messaging)
+- `mail` (eKor messaging)
 
 ### Choose a Provider
 
@@ -39,7 +39,7 @@ These are pulled in automatically:
 
 | I want to...                    | Install                                                      |
 | ------------------------------- | ------------------------------------------------------------ |
-| Chat with GPT-4 in Odoo         | `llm_assistant` + `llm_openai`                               |
+| Chat with GPT-4 in eKor         | `llm_assistant` + `llm_openai`                               |
 | Use local AI (privacy)          | `llm_assistant` + `llm_ollama`                               |
 | Add document search (RAG)       | Above + `llm_knowledge` + `llm_pgvector`                     |
 | Connect Claude Desktop          | Above + `llm_mcp_server`                                     |
@@ -47,14 +47,14 @@ These are pulled in automatically:
 
 ## Overview
 
-The LLM Assistant module provides sophisticated AI assistant management that goes far beyond simple chatbots. It serves as the intelligent configuration layer that orchestrates how AI models interact with Odoo data, with integrated prompt template management and comprehensive testing capabilities.
+The LLM Assistant module provides sophisticated AI assistant management that goes far beyond simple chatbots. It serves as the intelligent configuration layer that orchestrates how AI models interact with eKor data, with integrated prompt template management and comprehensive testing capabilities.
 
 ### Core Capabilities
 
 - **AI Assistant Configuration** - Define specialized AI personas with specific roles and capabilities
 - **Integrated Prompt Management** - Consolidated prompt template system (formerly separate `llm_prompt` module)
 - **Template Testing** - Built-in testing wizard for prompt validation and optimization
-- **Context Orchestration** - Intelligent mapping between Odoo data and AI inputs
+- **Context Orchestration** - Intelligent mapping between eKor data and AI inputs
 - **Tool Management** - Configure available tools and their usage patterns
 - **Generation Configuration** - Templates for different content types (text, images, etc.)
 
@@ -224,7 +224,7 @@ wizard.run_test_scenarios([
 
 ```python
 def prepare_context(self, record=None, user_input=None):
-    """Transform Odoo data into LLM-compatible context"""
+    """Transform eKor data into LLM-compatible context"""
     context = {}
 
     if record and record._name == 'sale.order':
@@ -456,7 +456,7 @@ class ProjectTask(models.Model):
 
 - **`llm`**: Base infrastructure and provider management
 - **`llm_thread`**: Chat interfaces and conversation management
-- **`llm_tool`**: Function calling and Odoo integration
+- **`llm_tool`**: Function calling and eKor integration
 - **`llm_generate`**: Content generation with assistant integration
 - **`llm_knowledge`**: RAG and knowledge base integration
 
