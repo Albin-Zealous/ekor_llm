@@ -1,6 +1,6 @@
 {
     "name": "LLM Tool",
-    "version": "17.0.4.1.2",
+    "version": "17.0.4.1.3",
     "category": "Technical",
     "summary": "Function calling and tool execution for LLM models to interact with eKor",
     "description": """
@@ -27,7 +27,7 @@
     "license": "LGPL-3",
     "depends": ["base", "mail", "llm"],
     "external_dependencies": {
-        "python": ["pydantic>=2.0.0", "mcp"],
+        "python": ["pydantic>=2.0.0", "mcp>=1.2.0,<2.0.0a0"],
     },
     "data": [
         "security/ir.model.access.csv",

@@ -20,7 +20,7 @@ class APIKeyDescriptionMCP(models.TransientModel):
 
         description = self.sudo()
         k = self.env["res.users.apikeys"]._generate(
-            None, description.name, self.expiration_date
+            None, description.name
         )
         description.unlink()
 

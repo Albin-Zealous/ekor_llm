@@ -1,6 +1,6 @@
 {
     "name": "LLM MCP Server",
-    "version": "17.0.1.3.2",
+    "version": "17.0.1.3.5",
     "category": "Technical",
     "summary": "MCP server exposing eKor LLM tools to Claude Desktop and other MCP hosts",
     "description": """
@@ -29,7 +29,7 @@
     "license": "LGPL-3",
     "depends": ["base", "llm", "llm_tool", "web_json_editor"],
     "external_dependencies": {
-        "python": ["mcp"],
+        "python": ["mcp>=1.2.0,<2.0.0a0"],
     },
     "data": [
         "security/ir.model.access.csv",
