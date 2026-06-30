@@ -78,14 +78,33 @@ patch(llmStoreService, {
             return;
           }
 
-          // Reuse existing fetchData pattern to refresh thread data
-          await activeThread.fetchData([
-            "assistant_id",
-            "provider_id",
-            "model_id",
-            "tool_ids",
-            "prompt_id",
-          ]);
+          // Refresh the thread's fields after assigning the assistant (it can
+          // cascade provider/model/tools/prompt). Odoo 18 used fetchData([...]);
+          // 17 has no fetchData, so ORM-read and apply to the in-store record.
+          try {
+            const recs = await orm.read(
+              "llm.thread",
+              [activeThread.id],
+              ["assistant_id", "provider_id", "model_id", "tool_ids", "prompt_id"]
+            );
+            if (recs.length) {
+              const rec = recs[0];
+              activeThread.assistant_id = rec.assistant_id
+                ? rec.assistant_id[0]
+                : false;
+              activeThread.provider_id = rec.provider_id
+                ? rec.provider_id[0]
+                : false;
+              activeThread.model_id = rec.model_id ? rec.model_id[0] : false;
+              activeThread.tool_ids = rec.tool_ids || [];
+              activeThread.prompt_id = rec.prompt_id ? rec.prompt_id[0] : false;
+            }
+          } catch (readErr) {
+            console.warn(
+              "Could not refresh thread after assistant change:",
+              readErr.message
+            );
+          }
         } catch (error) {
           console.error("Error selecting assistant:", error);
           notification.add("Failed to update assistant", { type: "danger" });

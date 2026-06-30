@@ -174,13 +174,17 @@ export class LLMThreadHeader extends Component {
     try {
       this.state.isLoadingUpdate = true;
 
+      const newName = this.state.pendingName.trim();
+
       // Update thread name via ORM
       await this.orm.write("llm.thread", [this.activeThread.id], {
-        name: this.state.pendingName.trim(),
+        name: newName,
       });
 
-      // Reload thread data using proper fetchData pattern
-      await this.activeThread.fetchData(["name"]);
+      // Reflect the new value on the in-store record. Odoo 18 used
+      // activeThread.fetchData(["name"]); that method does not exist in 17, and
+      // we already know the value we just wrote, so set it directly.
+      this.activeThread.name = newName;
 
       this.state.isEditingName = false;
       this.state.pendingName = "";
@@ -248,8 +252,11 @@ export class LLMThreadHeader extends Component {
       // Update via ORM
       await this.orm.write("llm.thread", [this.activeThread.id], updateData);
 
-      // Reload thread data using proper fetchData pattern
-      await this.activeThread.fetchData(["provider_id", "model_id"]);
+      // Reflect the new values on the in-store record (no fetchData in 17).
+      this.activeThread.provider_id = provider.id;
+      if (defaultModel) {
+        this.activeThread.model_id = defaultModel.id;
+      }
     } catch (error) {
       this.notification.add(
         _t("Could not change the AI provider. Please try again."),
@@ -280,8 +287,8 @@ export class LLMThreadHeader extends Component {
         model_id: model.id,
       });
 
-      // Reload thread data using proper fetchData pattern
-      await this.activeThread.fetchData(["model_id"]);
+      // Reflect the new value on the in-store record (no fetchData in 17).
+      this.activeThread.model_id = model.id;
 
       // Clear search
       this.state.modelSearchQuery = "";
@@ -338,10 +345,8 @@ export class LLMThreadHeader extends Component {
       });
 
       // Immediately update local state to ensure UI reflects change
+      // (no fetchData in 17; the line above already updates the in-store record)
       this.activeThread.tool_ids = newToolIds;
-
-      // Reload thread data using proper fetchData pattern
-      await this.activeThread.fetchData(["tool_ids"]);
     } catch (error) {
       this.notification.add(
         _t("Could not update the enabled tools. Please try again."),

@@ -82,8 +82,13 @@ patch(Chatter.prototype, {
     }
     this.store.discuss.thread = llmThread;
 
-    // Fetch thread data
-    await llmThread.fetchData(["messages"]);
+    // Load existing message history. Odoo 18 used fetchData(["messages"]); 17
+    // has no fetchData. History-loading via ORM is handled centrally by the llm
+    // store; for a freshly opened/created thread there is no history to load, so
+    // this is a no-op here. (Streaming messages arrive via handleStreamMessage.)
+    if (typeof llmStore.loadThreadMessages === "function") {
+      await llmStore.loadThreadMessages(pending.threadId);
+    }
 
     // Open AI chat mode
     this.state.isChattingWithLLM = true;
@@ -174,8 +179,11 @@ patch(Chatter.prototype, {
           }
           this.store.discuss.thread = llmThread;
 
-          // Fetch thread data
-          await llmThread.fetchData(["messages"]);
+          // Load existing history via the llm store (no fetchData in 17).
+          const llmStore = this.env.services["llm.store"];
+          if (llmStore && typeof llmStore.loadThreadMessages === "function") {
+            await llmStore.loadThreadMessages(threadId);
+          }
 
           this.state.isChattingWithLLM = true;
           this.state.llmThreadId = threadId;

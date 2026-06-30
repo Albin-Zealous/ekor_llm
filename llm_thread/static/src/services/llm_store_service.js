@@ -63,8 +63,28 @@ export const llmStoreService = {
           return thread;
         }
 
-        // If thread not found, it might not be accessible to current user
-        // or wasn't loaded in init_messaging (e.g., old thread, different user)
+        // Not in the store yet (e.g. just created, or not loaded at init).
+        // Odoo 18 relied on init_messaging/fetchData here; in 17 we ORM-read
+        // the single record and insert it.
+        try {
+          const recs = await orm.read(
+            "llm.thread",
+            [threadId],
+            ["id", "name", "provider_id", "model_id", "write_date"]
+          );
+          if (recs.length) {
+            const rec = recs[0];
+            return mailStore.Thread.insert({
+              model: "llm.thread",
+              id: rec.id,
+              name: rec.name,
+              write_date: rec.write_date,
+            });
+          }
+        } catch (error) {
+          console.warn(`Could not load thread ${threadId}:`, error.message);
+        }
+
         console.warn(`Thread ${threadId} not found in mailStore`);
         return null;
       },
@@ -145,16 +165,15 @@ export const llmStoreService = {
       handleStreamMessage(threadId, data) {
         switch (data.type) {
           case "message_create": {
-            // Handle all messages (user and AI) via EventSource
-            mailStore.insert(
-              { "mail.message": [data.message] },
-              { html: true }
-            );
+            // Insert the message into the store. Odoo 18 used
+            // mailStore.insert({"mail.message":[...]}) + mailStore.Message.get();
+            // 17's pattern is Message.insert(flatDict, {html:true}), which
+            // creates-or-updates by id and returns the record.
+            const createdMessage = mailStore.Message.insert(data.message, {
+              html: true,
+            });
 
-            // Get the created message and add it to the thread's messages collection
-            const createdMessage = mailStore.Message.get(data.message.id);
-
-            // Add message to the correct thread's messages collection (not the active thread)
+            // Add message to the correct thread's messages collection
             const createThread = mailStore.Thread.get({
               model: "llm.thread",
               id: threadId,
@@ -171,13 +190,8 @@ export const llmStoreService = {
 
           case "message_chunk":
           case "message_update":
-            // Update existing message using standard mail.store.insert() like Odoo does
-            // Use the same pattern as Odoo's standard bus handlers - always use insert
-            // which will update existing messages or create new ones as needed
-            mailStore.insert(
-              { "mail.message": [data.message] },
-              { html: true }
-            );
+            // Create-or-update the streaming message (17 Message.insert).
+            mailStore.Message.insert(data.message, { html: true });
             break;
 
           case "error":
@@ -260,6 +274,76 @@ export const llmStoreService = {
         });
       },
 
+      // Load the current user's LLM threads via ORM and insert them into
+      // mail.store. Odoo 18 populated these through init_messaging /
+      // _thread_to_store (the Store API); Odoo 17 has neither, so we read the
+      // records directly and Thread.insert() each one. The llmThreadList getter
+      // and ensureThreadLoaded keep reading mailStore.Thread.records unchanged.
+      async loadLLMThreads() {
+        try {
+          const threads = await orm.searchRead(
+            "llm.thread",
+            [],
+            ["id", "name", "provider_id", "model_id", "write_date"],
+            { order: "write_date desc" }
+          );
+          threads.forEach((rec) => {
+            mailStore.Thread.insert({
+              model: "llm.thread",
+              id: rec.id,
+              name: rec.name,
+              write_date: rec.write_date,
+            });
+          });
+        } catch (error) {
+          console.warn(
+            "LLM threads not available - llm module may not be installed:",
+            error.message
+          );
+        }
+      },
+
+      // Load a thread's existing message history via ORM and insert into the
+      // store. Odoo 18 did this through fetchData(["messages"]) on the Store
+      // API; 17 has neither, so we read mail.message rows for the thread and
+      // hand them to mailStore.insert in the same shape the streaming handler
+      // uses. New threads have no history, so this is typically a no-op.
+      async loadThreadMessages(threadId) {
+        try {
+          const messages = await orm.searchRead(
+            "mail.message",
+            [
+              ["model", "=", "llm.thread"],
+              ["res_id", "=", threadId],
+            ],
+            ["id", "body", "author_id", "date", "message_type", "llm_role"],
+            { order: "id asc" }
+          );
+          if (!messages.length) {
+            return;
+          }
+          const thread = mailStore.Thread.get({
+            model: "llm.thread",
+            id: threadId,
+          });
+          messages.forEach((msg) => {
+            const rec = mailStore.Message.insert(msg, { html: true });
+            if (
+              thread &&
+              rec &&
+              !thread.messages.some((m) => m.id === rec.id)
+            ) {
+              thread.messages.push(rec);
+            }
+          });
+        } catch (error) {
+          console.warn(
+            `Could not load messages for thread ${threadId}:`,
+            error.message
+          );
+        }
+      },
+
       // Thread selection using standard Odoo patterns
       async selectThread(threadId) {
         try {
@@ -269,8 +353,17 @@ export const llmStoreService = {
             throw new Error("Thread not found or failed to load");
           }
 
-          // Set as active thread in discuss - this is all we need!
-          thread.setAsDiscussThread();
+          // Set as active thread in discuss. Odoo 18 had
+          // thread.setAsDiscussThread(); that method does not exist in 17, so
+          // we set the active thread directly (same pattern chatter_patch uses)
+          // and sync the URL/breadcrumb via our llm-safe setActiveURL override.
+          if (!mailStore.discuss) {
+            mailStore.discuss = {};
+          }
+          mailStore.discuss.thread = thread;
+          if (typeof thread.setActiveURL === "function") {
+            thread.setActiveURL();
+          }
         } catch (error) {
           console.error("Error selecting thread:", error);
           notification.add(
@@ -339,19 +432,25 @@ export const llmStoreService = {
       // Get first available model
       getFirstAvailableModel() {
         const models = Array.from(this.llmModels.values());
-        return models.length > 0 ? models[0] : null;
+        if (!models.length) {
+          return null;
+        }
+        // Prefer the model flagged default; then any chat-capable model; then
+        // fall back to the first. Avoids defaulting to a model the account
+        // can't call (e.g. a restricted model that happens to sort first).
+        return (
+          models.find((m) => m.default) ||
+          models.find((m) => m.model_use === "chat") ||
+          models[0]
+        );
       },
 
       // Refresh threads and select specific thread
       async refreshThreadsAndSelect(threadId) {
-        // Use proper fetchData to refresh thread data
-        // Will trigger proper reload of all threads
-        await mailStore.fetchData({
-          init_messaging: {},
-        });
-
-        // Wait a moment for threads to be populated
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        // Reload the thread list via ORM (Odoo 17 has no mailStore.fetchData /
+        // init_messaging). ensureThreadLoaded will also insert the new thread
+        // on demand, but refreshing keeps the sidebar list current.
+        await this.loadLLMThreads();
 
         // Select the newly created thread
         await this.selectThread(threadId);
@@ -465,7 +564,12 @@ export const llmStoreService = {
 
       // Get list of data loaders - can be extended by patches
       getDataLoaders() {
-        return [this.loadLLMProviders, this.loadLLMModels, this.loadLLMTools];
+        return [
+          this.loadLLMProviders,
+          this.loadLLMModels,
+          this.loadLLMTools,
+          this.loadLLMThreads,
+        ];
       },
 
       // Initialize LLM store - threads now loaded via standard init_messaging

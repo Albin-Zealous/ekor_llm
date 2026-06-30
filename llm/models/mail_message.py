@@ -228,15 +228,24 @@ class MailMessage(models.Model):
         return {message: message.llm_role == role for message in self}
 
     def to_store_format(self):
-        """Convert message to store format compatible with Odoo 18.0. Used by frontend js components"""
+        """Return a JSON-ready message dict for the frontend chat UI.
+
+        Odoo 18 built this via the Store API (mail.tools.discuss.Store), which
+        does not exist in Odoo 17. Use 17's native message_format() and graft
+        on the LLM-specific fields the chat UI reads (llm_role, body_json).
+        message_format() already supplies id, model, res_id, author, body,
+        date, etc., which is exactly what mailStore.insert({"mail.message":[...]})
+        consumes on the frontend.
+        """
         self.ensure_one()
-        from odoo.addons.mail.tools.discuss import Store
-
-        store = Store()
-        self._to_store(store)
-        result = store.get_result()
-
-        return result["mail.message"][0]
+        data = self.message_format()[0]
+        data.update(
+            {
+                "llm_role": self.llm_role,
+                "body_json": self.body_json,
+            }
+        )
+        return data
 
     def _get_attachments_by_mimetype(self, mimetypes):
         """Get attachments filtered by mimetype.

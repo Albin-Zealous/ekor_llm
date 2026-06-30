@@ -54,17 +54,27 @@ patch(Composer.prototype, {
 
   async sendMessage() {
     if (this.isLLMThread && this.llmStore) {
-      const content = this.props.composer.text?.trim();
-      const attachments = this.props.composer.attachments || [];
+      // Odoo 17 stores composer text in `textInputContent` (there is no `text`
+      // field). Read that; fall back to `text` for safety across versions.
+      const composer = this.props.composer;
+      const content = (composer.textInputContent ?? composer.text)?.trim();
+      const attachments = composer.attachments || [];
       const attachmentIds = attachments.map((att) => att.id);
 
       if (!content && attachmentIds.length === 0) {
         return;
       }
 
-      const threadId = this.props.composer.thread.id;
+      const threadId = composer.thread.id;
 
-      this.props.composer.clear();
+      // Clear the composer. Prefer the native clear() if present; otherwise
+      // reset the 17 fields directly.
+      if (typeof composer.clear === "function") {
+        composer.clear();
+      } else {
+        composer.textInputContent = "";
+        composer.attachments = [];
+      }
 
       await this.llmStore.sendLLMMessage(threadId, content, attachmentIds);
       return;
@@ -146,7 +156,9 @@ patch(Composer.prototype, {
    */
   get isDisabled() {
     if (this.isLLMThread) {
-      return this.isStreaming || !this.props.composer.text?.trim();
+      const composer = this.props.composer;
+      const content = (composer.textInputContent ?? composer.text)?.trim();
+      return this.isStreaming || !content;
     }
 
     // Use original disabled logic for regular mail

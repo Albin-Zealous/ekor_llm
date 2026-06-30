@@ -23,6 +23,7 @@ export class LLMChatContainer extends Component {
     this.llmStore = useState(useService("llm.store"));
     this.mailStore = useService("mail.store"); // Odoo 17: already reactive; do not re-wrap in useState
     this.action = useService("action");
+    this.orm = useService("orm");
     this.ui = useState(useService("ui")); // Wrap with useState to make it reactive
 
     // Reference to the scrollable thread container for proper jump-to-present behavior
@@ -211,14 +212,35 @@ export class LLMChatContainer extends Component {
       },
       {
         onClose: async () => {
-          // Refresh thread data after closing form
-          await this.activeThread.fetchData([
-            "name",
-            "provider_id",
-            "model_id",
-            "tool_ids",
-            "assistant_id",
-          ]);
+          // Refresh thread data after closing the settings form. Odoo 18 used
+          // activeThread.fetchData([...]); 17 has no fetchData, so ORM-read the
+          // edited fields and apply them to the in-store record.
+          if (!this.activeThread) {
+            return;
+          }
+          try {
+            const recs = await this.orm.read(
+              "llm.thread",
+              [this.activeThread.id],
+              ["name", "provider_id", "model_id", "tool_ids", "assistant_id"]
+            );
+            if (recs.length) {
+              const rec = recs[0];
+              this.activeThread.name = rec.name;
+              this.activeThread.provider_id = rec.provider_id
+                ? rec.provider_id[0]
+                : false;
+              this.activeThread.model_id = rec.model_id
+                ? rec.model_id[0]
+                : false;
+              this.activeThread.tool_ids = rec.tool_ids || [];
+              this.activeThread.assistant_id = rec.assistant_id
+                ? rec.assistant_id[0]
+                : false;
+            }
+          } catch (error) {
+            console.warn("Could not refresh thread after settings:", error.message);
+          }
         },
       }
     );
