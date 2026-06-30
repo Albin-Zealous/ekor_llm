@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates>
+    <t
+        t-name="llm_thread.ChatterAIExtension"
+        t-inherit="mail.Chatter"
+        t-inherit-mode="extension"
+    >
+        <!-- AI toggle button in the topbar (anchor resolves in 17) -->
+        <xpath expr="//span[hasclass('o-mail-Chatter-topbarGrow')]" position="before">
+            <button
+                t-if="shouldShowAIButton"
+                class="o-mail-Chatter-aiChat btn text-nowrap ms-1 me-1 my-2"
+                t-att-class="{ 'btn-primary': state.isChattingWithLLM }"
+                type="button"
+                t-on-click="onAIChatClick"
+                t-att-title="state.isChattingWithLLM ? 'Exit AI Chat' : 'Start AI Chat'"
+            >
+                <i class="fa fa-robot me-1" role="img" aria-label="AI Chat" />
+                <span class="d-none d-sm-inline" t-esc="state.isChattingWithLLM ? 'Exit AI' : 'AI'" />
+            </button>
+        </xpath>
+
+        <!-- LLM chat surface, shown only while chatting -->
+        <xpath expr="//div[hasclass('o-mail-Chatter-content')]" position="before">
+            <div
+                t-if="state.isChattingWithLLM"
+                class="o-mail-Chatter-content o-llm-Chatter-aiContent d-flex flex-column flex-grow-1"
+            >
+                <LLMChatContainer recordModel="props.threadModel" recordId="props.threadId" />
+            </div>
+        </xpath>
+
+        <!-- Hide native content while chatting -->
+        <xpath expr="//div[hasclass('o-mail-Chatter-content')]" position="attributes">
+            <attribute name="t-att-class">{ 'd-none': state.isChattingWithLLM }</attribute>
+        </xpath>
+    </t>
+</templates>
